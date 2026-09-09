@@ -1,0 +1,2 @@
+experiment_id,algorithm_name,k,probability,num_simulations,mean_influence,std_influence,influence_pct,runtime_sec,spread_efficiency
+expA_k10_p01,greedy,10,0.1,50,842.5,88.3,20.8,2.45,84.25

@@ -1,0 +1,9 @@
+{
+  "node_count": 4039,
+  "edge_count": 88234,
+  "degree_distribution": {
+    "1": 10,
+    "2": 50
+  },
+  "timestamp": "2026-09-09T07:55:24.902344+00:00"
+}
