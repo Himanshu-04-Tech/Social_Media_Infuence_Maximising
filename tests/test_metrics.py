@@ -140,6 +140,39 @@ class TestMetricsBasics(unittest.TestCase):
         with self.assertRaises(ValueError):
             compare_algorithms(self.g, k=2, p=0.1, simulations=0)
 
+    def test_09_frontend_direct_wrappers(self):
+        """Verify Himanshu's exact requested wrapper functions and signatures."""
+        from src import (
+            random_selection,
+            degree_selection,
+            greedy_selection,
+            simulate_influence,
+        )
+
+        # 1. random_selection(graph, k)
+        seeds_rnd = random_selection(self.g, k=2)
+        self.assertEqual(len(seeds_rnd), 2)
+
+        # 2. degree_selection(graph, k)
+        seeds_deg = degree_selection(self.g, k=2)
+        self.assertEqual(len(seeds_deg), 2)
+
+        # 3. greedy_selection(graph, k) with default p
+        seeds_grd = greedy_selection(self.g, k=2)
+        self.assertEqual(len(seeds_grd), 2)
+
+        # 4. simulate_influence(graph, seeds, p)
+        active = simulate_influence(self.g, seeds_deg, p=0.05)
+        self.assertIsInstance(active, set)
+        self.assertGreaterEqual(len(active), 2)
+
+        # 5. simulate_influence with return_history=True
+        active, history = simulate_influence(self.g, seeds_deg, p=0.05, return_history=True)
+        self.assertIsInstance(active, set)
+        self.assertIsInstance(history, list)
+        self.assertGreaterEqual(len(history), 1)
+
 
 if __name__ == "__main__":
     unittest.main()
+

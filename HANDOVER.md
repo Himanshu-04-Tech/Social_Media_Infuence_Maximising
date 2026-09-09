@@ -22,9 +22,41 @@ You do **not** need to implement any graph math, BFS, diffusion simulations, or 
 
 ---
 
-## 🔌 The 3 Backend APIs You Will Use
+## ⚡ Direct Functions for Role 2 (Exactly What You Asked For!)
 
-All functions return standard, pure Python data structures (`dict`, `list`, `int`, `float`) that can be converted directly into JSON via `json.dumps()` or fed into Pandas/Plotly/Streamlit/D3.js.
+You can import and call these 4 functions directly from `src`:
+
+```python
+from src import (
+    Graph,
+    random_selection,
+    degree_selection,
+    greedy_selection,
+    simulate_influence,
+)
+
+# 1. Load Graph
+graph = Graph()
+graph.load_from_edge_list("data/facebook_combined.txt")
+
+# 2. Select Seeds
+seeds_random = random_selection(graph, k=10)
+seeds_degree = degree_selection(graph, k=10)
+seeds_greedy = greedy_selection(graph, k=10, p=0.05)  # or just greedy_selection(graph, k=10)
+
+# 3. Simulate Cascade Spread
+# Returns the set of all infected node IDs
+infected_users = simulate_influence(graph, seeds=seeds_greedy, p=0.05)
+
+# 4. Optional: Animate Spreading Wavefronts
+# Returns (all_infected, [t0_seeds, t1_infected, t2_infected, ...])
+all_infected, history = simulate_influence(graph, seeds=seeds_greedy, p=0.05, return_history=True)
+```
+
+---
+
+## 🔌 Advanced APIs You Can Also Use
+
 
 ---
 
