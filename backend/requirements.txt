@@ -1,7 +1,8 @@
-# Requirements for Social Network Influence Maximization Simulator (Modules 1–5)
+# Requirements for Social Network Influence Maximization Simulator (Modules 1–6)
 networkx>=3.0
 pandas>=2.0.0
 numpy>=1.24.0
 plotly>=5.15.0
 matplotlib>=3.7.0
+pyvis>=0.3.2
 pytest>=7.0.0
