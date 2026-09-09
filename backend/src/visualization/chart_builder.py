@@ -2,6 +2,7 @@
 
 Serves as the primary façade for Module 5, exposing a single entry point
 to construct Plotly and Matplotlib figures.
+Supports both class-level static calls and configured instance calls.
 """
 
 from __future__ import annotations
@@ -53,86 +54,96 @@ class VisualizationFactory:
         self.default_config = default_config
         self.log = custom_logger or logger
 
+    @classmethod
     def create_algorithm_comparison_chart(
-        self,
+        cls,
         metrics_df: pd.DataFrame,
         config: ChartConfig | None = None,
+        custom_logger: logging.Logger | None = None,
     ) -> go.Figure:
         """Create interactive Plotly algorithm comparison grouped bar chart."""
         return create_algorithm_comparison_chart(
             metrics_df=metrics_df,
-            config=config or self.default_config,
-            custom_logger=self.log,
+            config=config,
+            custom_logger=custom_logger or logger,
         )
 
+    @classmethod
     def create_seed_budget_chart(
-        self,
+        cls,
         experiment_a_df: pd.DataFrame,
         config: ChartConfig | None = None,
+        custom_logger: logging.Logger | None = None,
     ) -> go.Figure:
         """Create interactive Plotly influence vs seed budget multi-line chart."""
         return create_seed_budget_chart(
             experiment_a_df=experiment_a_df,
-            config=config or self.default_config,
-            custom_logger=self.log,
+            config=config,
+            custom_logger=custom_logger or logger,
         )
 
+    @classmethod
     def create_runtime_scalability_chart(
-        self,
+        cls,
         experiment_c_df: pd.DataFrame,
         log_scale: bool = False,
         config: ChartConfig | None = None,
+        custom_logger: logging.Logger | None = None,
     ) -> go.Figure:
         """Create interactive Plotly runtime vs network size scalability chart."""
         return create_runtime_scalability_chart(
             experiment_c_df=experiment_c_df,
             log_scale=log_scale,
-            config=config or self.default_config,
-            custom_logger=self.log,
+            config=config,
+            custom_logger=custom_logger or logger,
         )
 
+    @classmethod
     def create_convergence_chart(
-        self,
+        cls,
         experiment_d_df: pd.DataFrame,
         config: ChartConfig | None = None,
+        custom_logger: logging.Logger | None = None,
     ) -> go.Figure:
         """Create interactive Plotly Monte Carlo convergence chart with confidence bands."""
         return create_convergence_chart(
             experiment_d_df=experiment_d_df,
-            config=config or self.default_config,
-            custom_logger=self.log,
+            config=config,
+            custom_logger=custom_logger or logger,
         )
 
+    @classmethod
     def create_degree_distribution_chart(
-        self,
+        cls,
         degree_distribution: Any,
         config: ChartConfig | None = None,
+        custom_logger: logging.Logger | None = None,
     ) -> go.Figure:
         """Create interactive Plotly degree distribution histogram."""
         return create_degree_distribution_chart(
             degree_distribution=degree_distribution,
-            config=config or self.default_config,
-            custom_logger=self.log,
+            config=config,
+            custom_logger=custom_logger or logger,
         )
 
+    @staticmethod
     def create_dataset_summary(
-        self,
         node_count: int,
         edge_count: int,
     ) -> dict[str, Any]:
         """Compute network summary KPI metrics (node_count, edge_count, avg_degree)."""
         return create_dataset_summary(node_count=node_count, edge_count=edge_count)
 
+    @staticmethod
     def export_plotly_chart(
-        self,
         figure: go.Figure,
         filepath: Path | str,
     ) -> Path:
         """Export Plotly figure to HTML, PNG, or SVG."""
         return export_plotly_chart(figure, filepath)
 
+    @staticmethod
     def export_matplotlib_chart(
-        self,
         figure: Any,
         filepath: Path | str,
     ) -> Path:
