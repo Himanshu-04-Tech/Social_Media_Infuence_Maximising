@@ -1,0 +1,15 @@
+{
+  "algorithm": "greedy",
+  "k": 10,
+  "probability": 0.1,
+  "mean": 842.5,
+  "min": 701,
+  "max": 1003,
+  "std": 88.3,
+  "raw_results": [
+    750,
+    840,
+    930
+  ],
+  "created_at": "2026-09-09T07:55:24.900982+00:00"
+}

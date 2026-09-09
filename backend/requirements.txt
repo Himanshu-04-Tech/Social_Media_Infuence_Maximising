@@ -1,0 +1,4 @@
+# Requirements for Social Network Influence Maximization Simulator (Modules 1 & 2)
+networkx>=3.0
+pandas>=2.0.0
+pytest>=7.0.0
