@@ -161,16 +161,17 @@ class TestMetricsBasics(unittest.TestCase):
         seeds_grd = greedy_selection(self.g, k=2)
         self.assertEqual(len(seeds_grd), 2)
 
-        # 4. simulate_influence(graph, seeds, p)
+        # 4. simulate_influence(graph, seeds, p) -> int count (InfluenceResult)
         active = simulate_influence(self.g, seeds_deg, p=0.05)
-        self.assertIsInstance(active, set)
-        self.assertGreaterEqual(len(active), 2)
+        self.assertIsInstance(active, int)
+        self.assertGreaterEqual(int(active), 2)
 
-        # 5. simulate_influence with return_history=True
+        # 5. simulate_influence with return_history=True -> (int count, history_layers)
         active, history = simulate_influence(self.g, seeds_deg, p=0.05, return_history=True)
-        self.assertIsInstance(active, set)
+        self.assertIsInstance(active, int)
         self.assertIsInstance(history, list)
         self.assertGreaterEqual(len(history), 1)
+
 
 
 if __name__ == "__main__":

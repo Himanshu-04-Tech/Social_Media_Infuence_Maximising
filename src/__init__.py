@@ -105,33 +105,54 @@ def greedy_selection(
     )
 
 
+class InfluenceResult(int):
+    """
+    Subclass of int representing the count of influenced nodes.
+    Supports int(result) for Himanshu's experiment runner, while also
+    exposing .nodes (Set[int]) and iteration for node-level inspection.
+    """
+    def __new__(cls, nodes: Any) -> "InfluenceResult":
+        count = len(nodes) if isinstance(nodes, (set, list, tuple)) else int(nodes)
+        obj = super().__new__(cls, count)
+        obj.nodes = set(nodes) if isinstance(nodes, (set, list, tuple)) else set()
+        return obj
+
+    def __iter__(self):
+        return iter(self.nodes)
+
+    def __len__(self) -> int:
+        return len(self.nodes)
+
+    def isdisjoint(self, other: Any) -> bool:
+        return self.nodes.isdisjoint(other)
+
+
 def simulate_influence(
     graph: Graph,
     seeds: Iterable[int],
     p: float = 0.05,
     rng: Optional[Union[random.Random, int]] = None,
     return_history: bool = False,
-) -> Union[Set[int], Tuple[Set[int], List[Set[int]]]]:
+) -> Union[InfluenceResult, Tuple[InfluenceResult, List[Set[int]]]]:
     """
     Simulates influence diffusion under the Independent Cascade model.
 
-    Args:
-        graph: The Graph instance.
-        seeds: Iterable of seed node IDs.
-        p: Propagation probability per edge (default: 0.05).
-        rng: Optional random.Random instance or int seed.
-        return_history: If True, returns (active_nodes, history_layers) for step-by-step UI animation.
-
     Returns:
-        Set[int] of all infected nodes (or (active_nodes, history_layers) if return_history=True).
+        InfluenceResult (acts as int for Monte Carlo runners, and as Set[int] for node inspection).
+        If return_history=True, returns (InfluenceResult, history_layers).
     """
-    return simulate_independent_cascade(
+    res = simulate_independent_cascade(
         graph=graph,
         seeds=seeds,
         p=p,
         rng=rng,
         return_history=return_history,
     )
+    if return_history:
+        active_set, history = res
+        return InfluenceResult(active_set), history
+    return InfluenceResult(res)
+
 
 
 __all__ = [
