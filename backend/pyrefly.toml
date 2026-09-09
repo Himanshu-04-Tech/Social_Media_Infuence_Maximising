@@ -1,0 +1,5 @@
+# Pyrefly Language Server configuration for backend
+search-path = [
+    "src",
+    "."
+]

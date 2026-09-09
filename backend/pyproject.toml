@@ -1,0 +1,17 @@
+[tool.pyrefly]
+search-path = [
+    "src",
+    "."
+]
+
+[tool.pyright]
+include = ["src", "tests"]
+extraPaths = [
+    "src"
+]
+
+[tool.pytest.ini_options]
+pythonpath = [
+    "src",
+    "."
+]
