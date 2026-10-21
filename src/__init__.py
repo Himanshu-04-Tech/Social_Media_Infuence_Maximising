@@ -34,6 +34,41 @@ from src.main import run_algorithm_api, compare_algorithms_api
 # Direct Frontend API Wrappers (Matched to Himanshu's exact specifications)
 # =====================================================================
 
+def load_graph(filepath: str = "data/facebook_combined.txt") -> Graph:
+    """
+    Loads an undirected graph from an edge list file into an Adjacency List Graph.
+
+    Args:
+        filepath: Path to the dataset file (default: "data/facebook_combined.txt").
+
+    Returns:
+        Graph: Fully populated Graph instance.
+    """
+    g = Graph()
+    g.load_from_edge_list(filepath)
+    return g
+
+
+def graph_statistics(graph: Graph) -> Dict[str, Any]:
+    """
+    Calculates key topological metrics of the graph.
+
+    Returns:
+        Dictionary containing:
+        - num_nodes: int
+        - num_edges: int
+        - average_degree: float
+        - min_degree: int
+        - max_degree: int
+        - connected_components: int
+        - num_connected_components: int
+        - largest_component_size: int
+        - highest_degree_nodes: List[Tuple[int, int]]
+        - degree_distribution: Dict[int, int]
+    """
+    return graph.get_statistics()
+
+
 def random_selection(
     graph: Graph,
     k: int,
@@ -157,6 +192,8 @@ def simulate_influence(
 
 __all__ = [
     "Graph",
+    "load_graph",
+    "graph_statistics",
     "random_selection",
     "degree_selection",
     "greedy_selection",

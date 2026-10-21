@@ -145,6 +145,19 @@ def create_seed_budget_chart(
     log = custom_logger or logger
     chart_name = "Influence vs Seed Budget"
 
+    if experiment_a_df is not None and isinstance(experiment_a_df, pd.DataFrame):
+        experiment_a_df = experiment_a_df.copy()
+        # Auto-detect wide format where algorithms are separate columns (e.g., ['k', 'random', 'degree', 'greedy'])
+        if "algorithm_name" not in experiment_a_df.columns and "k" in experiment_a_df.columns:
+            algo_cols = [c for c in experiment_a_df.columns if c != "k"]
+            if algo_cols:
+                experiment_a_df = experiment_a_df.melt(
+                    id_vars=["k"],
+                    value_vars=algo_cols,
+                    var_name="algorithm_name",
+                    value_name="mean_influence",
+                )
+
     log.info(
         "Chart Creation Started | Chart Type=%s | Rows Processed=%d",
         chart_name,
@@ -226,20 +239,33 @@ def create_runtime_scalability_chart(
     log = custom_logger or logger
     chart_name = "Runtime vs Network Size"
 
+    # Determine size column name
+    size_col = "node_count"
+    if experiment_c_df is not None and isinstance(experiment_c_df, pd.DataFrame):
+        experiment_c_df = experiment_c_df.copy()
+        if "node_count" not in experiment_c_df.columns:
+            if "size" in experiment_c_df.columns:
+                size_col = "size"
+            elif "k" in experiment_c_df.columns:
+                size_col = "k"
+
+        # Auto-detect wide format where algorithms are separate columns (e.g., ['node_count', 'random', 'degree', 'greedy'])
+        if "algorithm_name" not in experiment_c_df.columns and size_col in experiment_c_df.columns:
+            algo_cols = [c for c in experiment_c_df.columns if c != size_col]
+            if algo_cols:
+                experiment_c_df = experiment_c_df.melt(
+                    id_vars=[size_col],
+                    value_vars=algo_cols,
+                    var_name="algorithm_name",
+                    value_name="runtime_sec",
+                )
+
     log.info(
         "Chart Creation Started | Chart Type=%s | Rows Processed=%d",
         chart_name,
         len(experiment_c_df) if experiment_c_df is not None and hasattr(experiment_c_df, "__len__") else 0,
         extra={"event": "Chart Creation Started", "chart_type": chart_name},
     )
-
-    # Determine size column name
-    size_col = "node_count"
-    if "node_count" not in experiment_c_df.columns:
-        if "size" in experiment_c_df.columns:
-            size_col = "size"
-        elif "k" in experiment_c_df.columns:
-            size_col = "k"
 
     validate_chart_dataframe(
         experiment_c_df,
@@ -320,6 +346,13 @@ def create_convergence_chart(
     """
     log = custom_logger or logger
     chart_name = "Monte Carlo Convergence"
+
+    if experiment_d_df is not None and isinstance(experiment_d_df, pd.DataFrame):
+        experiment_d_df = experiment_d_df.copy()
+        if "simulations" in experiment_d_df.columns and "num_simulations" not in experiment_d_df.columns:
+            experiment_d_df = experiment_d_df.rename(columns={"simulations": "num_simulations"})
+        elif "iterations" in experiment_d_df.columns and "num_simulations" not in experiment_d_df.columns:
+            experiment_d_df = experiment_d_df.rename(columns={"iterations": "num_simulations"})
 
     log.info(
         "Chart Creation Started | Chart Type=%s | Rows Processed=%d",

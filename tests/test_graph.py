@@ -254,10 +254,33 @@ class TestSNAPDataset(unittest.TestCase):
         self.assertEqual(stats["num_nodes"], 4039)
         self.assertEqual(stats["num_edges"], 88234)
         self.assertEqual(stats["num_connected_components"], 1)
+        self.assertEqual(stats["connected_components"], 1)
         self.assertEqual(stats["largest_component_size"], 4039)
         self.assertEqual(stats["average_degree"], 43.691)
-        # Verify highest degree node exists and has high connectivity
+        self.assertEqual(stats["min_degree"], 1)
+        self.assertEqual(stats["max_degree"], 1045)
         self.assertGreater(stats["max_degree"], 1000)
+
+    def test_18_top_level_api_functions(self):
+        """Test 18: Top-level load_graph() and graph_statistics() functions."""
+        from src import load_graph, graph_statistics
+
+        g = load_graph(self.DATASET_PATH)
+        self.assertEqual(g.number_of_nodes(), 4039)
+        self.assertEqual(g.number_of_edges(), 88234)
+
+        stats = graph_statistics(g)
+        self.assertIn("num_nodes", stats)
+        self.assertIn("num_edges", stats)
+        self.assertIn("average_degree", stats)
+        self.assertIn("min_degree", stats)
+        self.assertIn("max_degree", stats)
+        self.assertIn("connected_components", stats)
+        self.assertEqual(stats["num_nodes"], 4039)
+        self.assertEqual(stats["num_edges"], 88234)
+        self.assertEqual(stats["min_degree"], 1)
+        self.assertEqual(stats["max_degree"], 1045)
+        self.assertEqual(stats["connected_components"], 1)
 
 
 if __name__ == "__main__":

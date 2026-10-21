@@ -14,10 +14,12 @@ SRC_DIR = Path(__file__).resolve().parent.parent
 if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
 
-# Ensure root dir is available for Role 1 imports
+# Ensure root dir and project root are available for Role 1 and package imports
 ROOT_DIR = SRC_DIR.parent
-if str(ROOT_DIR) not in sys.path:
-    sys.path.insert(0, str(ROOT_DIR))
+PROJECT_ROOT = ROOT_DIR.parent
+for p in (str(SRC_DIR), str(ROOT_DIR), str(PROJECT_ROOT)):
+    if p not in sys.path:
+        sys.path.insert(0, p)
 
 import streamlit as st
 

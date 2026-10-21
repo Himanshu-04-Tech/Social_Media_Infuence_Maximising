@@ -285,7 +285,9 @@ class Graph:
             - average_degree: float (rounded to 4 decimal places)
             - num_connected_components: int
             - largest_component_size: int
+            - min_degree: int
             - max_degree: int
+            - connected_components: int
             - highest_degree_nodes: List[Tuple[int, int]] (top 5)
             - degree_distribution: Dict[int, int] (degree -> node frequency)
         """
@@ -299,6 +301,7 @@ class Graph:
 
         ranked = self.degree_ranking()
         max_deg = ranked[0][1] if ranked else 0
+        min_deg = ranked[-1][1] if ranked else 0
         top_nodes = ranked[:5]
 
         degree_dist: Dict[int, int] = {}
@@ -309,9 +312,11 @@ class Graph:
             "num_nodes": n,
             "num_edges": e,
             "average_degree": round(avg_deg, 4),
-            "num_connected_components": num_comps,
-            "largest_component_size": largest_comp_size,
+            "min_degree": min_deg,
             "max_degree": max_deg,
+            "num_connected_components": num_comps,
+            "connected_components": num_comps,
+            "largest_component_size": largest_comp_size,
             "highest_degree_nodes": top_nodes,
             "degree_distribution": degree_dist,
         }

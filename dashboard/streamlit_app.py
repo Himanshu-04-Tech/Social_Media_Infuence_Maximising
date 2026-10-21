@@ -1,0 +1,26 @@
+"""Streamlit Dashboard application forwarder.
+
+Bridges root-level dashboard execution with the backend dashboard engine.
+"""
+
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
+# Ensure backend/src and project root are in sys.path
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+BACKEND_SRC = PROJECT_ROOT / "backend" / "src"
+
+if str(BACKEND_SRC) not in sys.path:
+    sys.path.insert(0, str(BACKEND_SRC))
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+# Import main entry point from backend
+from backend.src.dashboard.app import main
+
+__all__ = ["main"]
+ 
+if __name__ == "__main__":
+    main()
