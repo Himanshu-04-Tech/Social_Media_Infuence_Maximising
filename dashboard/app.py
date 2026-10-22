@@ -21,4 +21,6 @@ except (ImportError, ModuleNotFoundError):
     from backend.src.dashboard.app import main
 
 if __name__ == "__main__":
-    main()
+    if callable(main):
+        main()
+

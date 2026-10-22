@@ -17,10 +17,17 @@ if str(BACKEND_SRC) not in sys.path:
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-# Import main entry point from backend
-from backend.src.dashboard.app import main
+try:
+    from backend.src.dashboard.app import main
+except (ImportError, ModuleNotFoundError):
+    try:
+        from dashboard.app import main  # type: ignore
+    except (ImportError, ModuleNotFoundError):
+        from app import main  # type: ignore
 
 __all__ = ["main"]
- 
+
 if __name__ == "__main__":
-    main()
+    if callable(main):
+        main()
+

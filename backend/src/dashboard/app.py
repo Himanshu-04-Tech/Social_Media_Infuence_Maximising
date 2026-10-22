@@ -29,13 +29,23 @@ try:
 except ImportError:
     HAS_OPTION_MENU = False
 
-from dashboard.components.sidebar import render_sidebar
-from dashboard.config import LAYOUT, PAGE_ICON, PAGE_TITLE
-from dashboard.pages.experiments_page import render_experiments_page
-from dashboard.pages.results_page import render_results_page
-from dashboard.pages.settings_page import render_settings_page
-from dashboard.pages.simulation_page import render_simulation_page
-from dashboard.state_manager import DashboardStateManager
+try:
+    from .components.sidebar import render_sidebar
+    from .config import LAYOUT, PAGE_ICON, PAGE_TITLE
+    from .pages.experiments_page import render_experiments_page
+    from .pages.results_page import render_results_page
+    from .pages.settings_page import render_settings_page
+    from .pages.simulation_page import render_simulation_page
+    from .state_manager import DashboardStateManager
+except (ImportError, ValueError):
+    from dashboard.components.sidebar import render_sidebar  # type: ignore[no-redef]
+    from dashboard.config import LAYOUT, PAGE_ICON, PAGE_TITLE  # type: ignore[no-redef]
+    from dashboard.pages.experiments_page import render_experiments_page  # type: ignore[no-redef]
+    from dashboard.pages.results_page import render_results_page  # type: ignore[no-redef]
+    from dashboard.pages.settings_page import render_settings_page  # type: ignore[no-redef]
+    from dashboard.pages.simulation_page import render_simulation_page  # type: ignore[no-redef]
+    from dashboard.state_manager import DashboardStateManager  # type: ignore[no-redef]
+
 
 
 def main() -> None:

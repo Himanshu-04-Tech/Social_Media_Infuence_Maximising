@@ -1,9 +1,15 @@
 {
   "include": [
-    "backend"
+    "backend",
+    "dashboard",
+    "src",
+    "tests"
   ],
   "extraPaths": [
+    ".",
     "backend/src",
-    "backend"
+    "backend",
+    "src"
   ]
 }
+

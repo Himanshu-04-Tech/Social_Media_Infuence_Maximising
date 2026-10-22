@@ -1,20 +1,26 @@
 [tool.pyrefly]
 search-path = [
+    ".",
     "backend/src",
-    "backend"
+    "backend",
+    "src"
 ]
 
 [tool.pyright]
-include = ["backend"]
+include = ["backend", "dashboard", "src", "tests"]
 extraPaths = [
+    ".",
     "backend/src",
-    "backend"
+    "backend",
+    "src"
 ]
 
 [tool.pytest.ini_options]
 pythonpath = [
+    ".",
     "backend/src",
     "backend",
-    "."
+    "src"
 ]
-testpaths = ["backend/tests"]
+testpaths = ["backend/tests", "tests"]
+

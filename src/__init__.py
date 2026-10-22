@@ -12,8 +12,10 @@ Exposes the exact high-level API functions requested for frontend integration:
     - simulate_influence(graph, seeds, p=0.05, ...)
 """
 
-from typing import Any, Iterable, List, Optional, Set, Tuple, Union
+from __future__ import annotations
+
 import random
+from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union
 
 from src.graph import Graph
 from src.propagation import (

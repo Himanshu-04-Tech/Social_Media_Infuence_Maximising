@@ -17,12 +17,17 @@ try:
     from backend.src.dashboard.app import main
 except (ImportError, ModuleNotFoundError):
     try:
-        from dashboard.app import main  # type: ignore
+        from .app import main  # type: ignore
     except (ImportError, ModuleNotFoundError):
-        from app import main  # type: ignore
+        try:
+            from dashboard.app import main  # type: ignore
+        except (ImportError, ModuleNotFoundError):
+            from app import main  # type: ignore
 
 __all__ = ["main"]
 
 if __name__ == "__main__":
-    main()
+    if callable(main):
+        main()
+
 
