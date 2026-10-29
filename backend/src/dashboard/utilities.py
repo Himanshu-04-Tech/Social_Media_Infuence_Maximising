@@ -58,6 +58,26 @@ def to_networkx(graph: Any) -> nx.Graph:
     return G
 
 
+def to_role1_graph(graph: Any) -> Any:
+    """Convert NetworkX or other graph representations into a Role 1 Graph."""
+    if hasattr(graph, "degree_ranking") and hasattr(graph, "adj") and hasattr(graph, "bfs"):
+        return graph
+
+    try:
+        from src.graph import Graph as Role1Graph
+        r1_g = Role1Graph()
+        if isinstance(graph, nx.Graph):
+            for u in graph.nodes():
+                r1_g.add_node(int(u))
+            for u, v in graph.edges():
+                r1_g.add_edge(int(u), int(v))
+            return r1_g
+    except Exception as err:
+        logger.debug("Failed converting to Role 1 Graph: %s", err)
+
+    return graph
+
+
 @st.cache_resource(show_spinner=False)
 def load_dataset(dataset_name: str) -> nx.Graph:
     """Load and cache network graphs with high performance.
@@ -108,8 +128,9 @@ def select_seeds(
     node_list = list(graph.nodes() if hasattr(graph, "nodes") and callable(graph.nodes) else graph.nodes)
     k = min(k, len(node_list))
 
-    # Role 1 compatibility: only use Role 1 if graph has degree_ranking
-    is_role1_graph = hasattr(graph, "degree_ranking") and hasattr(graph, "adj")
+    # Role 1 compatibility: attempt Role 1 Graph algorithms first
+    r1_graph = to_role1_graph(graph)
+    is_role1_graph = hasattr(r1_graph, "degree_ranking") and hasattr(r1_graph, "adj")
 
     if is_role1_graph:
         try:
@@ -119,12 +140,18 @@ def select_seeds(
                 greedy_selection,
             )
             if algo_clean == "random":
-                return random_selection(graph, k)
+                return random_selection(r1_graph, k)
             elif algo_clean == "degree":
-                return degree_selection(graph, k)
+                return degree_selection(r1_graph, k)
             elif algo_clean == "greedy":
-                pool = [n for n, _ in graph.degree_ranking()[:50]] if "fast" in candidate_mode.lower() else None
-                return greedy_selection(graph, k, p=p, candidate_nodes=pool)
+                is_fast = "fast" in candidate_mode.lower()
+                pool = [n for n, _ in r1_graph.degree_ranking()[:max(50, k)]] if is_fast else None
+                sims = 10 if is_fast else 50
+                return greedy_selection(r1_graph, k, p=p, candidate_nodes=pool, simulations=sims)
+            elif algo_clean == "bfs":
+                start_node = r1_graph.degree_ranking()[0][0]
+                bfs_nodes, _ = r1_graph.bfs(start_node)
+                return bfs_nodes[:k]
         except Exception as err:
             logger.debug("Role 1 seed selection fallback: %s", err)
 
@@ -177,10 +204,11 @@ def simulate_single_cascade(
     Returns:
         Tuple of (influenced_count, set_of_all_influenced_nodes).
     """
-    if hasattr(graph, "adj") and not isinstance(graph, nx.Graph):
+    r1_graph = to_role1_graph(graph)
+    if hasattr(r1_graph, "adj") and hasattr(r1_graph, "degree"):
         try:
             from src import simulate_influence  # type: ignore
-            res = simulate_influence(graph, seeds, p)
+            res = simulate_influence(r1_graph, seeds, p)
             if hasattr(res, "nodes"):
                 return len(res.nodes), set(res.nodes)
             if isinstance(res, set):

@@ -43,3 +43,28 @@ class StorageRecord:
     created_at: str
     file_size: int
     file_type: str
+
+    def __str__(self) -> str:
+        return self.file_name
+
+    def __fspath__(self) -> str:
+        return str(self.file_path)
+
+    def encode(self, *args: any, **kwargs: any) -> bytes:
+        return self.file_name.encode(*args, **kwargs)
+
+    def strip(self, *args: any, **kwargs: any) -> str:
+        return self.file_name.strip(*args, **kwargs)
+
+    def endswith(self, *args: any, **kwargs: any) -> bool:
+        return self.file_name.endswith(*args, **kwargs)
+
+    def startswith(self, *args: any, **kwargs: any) -> bool:
+        return self.file_name.startswith(*args, **kwargs)
+
+    def replace(self, *args: any, **kwargs: any) -> str:
+        return self.file_name.replace(*args, **kwargs)
+
+    def lower(self) -> str:
+        return self.file_name.lower()
+

@@ -45,6 +45,17 @@ def render_charts_panel(results_df: pd.DataFrame) -> None:
         except Exception:
             stored_exps = {}
 
+    if not stored_exps:
+        try:
+            from storage.storage_manager import StorageManager
+            sm = StorageManager()
+            for exp_key, filename in [("ExpA", "expA"), ("ExpB", "expB"), ("ExpC", "expC"), ("ExpD", "expD")]:
+                loaded_df = sm.load_experiment_results(filename)
+                if loaded_df is not None and not loaded_df.empty:
+                    stored_exps[exp_key] = loaded_df
+        except Exception:
+            pass
+
     with tab1:
         st.caption("Grouped bar chart comparing Influence Spread vs Total Execution Runtime across algorithms.")
         if results_df is not None and not results_df.empty and len(results_df) >= 1:

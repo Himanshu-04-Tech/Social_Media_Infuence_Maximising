@@ -38,6 +38,7 @@ from visualization import (
     create_dataset_summary,
     create_degree_distribution_chart,
     create_matplotlib_algorithm_comparison,
+    create_probability_sensitivity_chart,
     create_runtime_scalability_chart,
     create_seed_budget_chart,
     export_matplotlib_chart,
@@ -63,6 +64,17 @@ def sample_exp_a_df() -> pd.DataFrame:
         rows.append({"algorithm_name": "greedy", "k": k, "mean_influence": k * 45.0})
         rows.append({"algorithm_name": "degree", "k": k, "mean_influence": k * 35.0})
         rows.append({"algorithm_name": "random", "k": k, "mean_influence": k * 18.0})
+    return pd.DataFrame(rows)
+
+
+@pytest.fixture
+def sample_exp_b_df() -> pd.DataFrame:
+    """Sample DataFrame matching Module 3 Experiment B output."""
+    rows = []
+    for p in [0.05, 0.10, 0.20, 0.30]:
+        rows.append({"algorithm_name": "greedy", "probability": p, "mean_influence": p * 2000.0})
+        rows.append({"algorithm_name": "degree", "probability": p, "mean_influence": p * 1600.0})
+        rows.append({"algorithm_name": "random", "probability": p, "mean_influence": p * 600.0})
     return pd.DataFrame(rows)
 
 
@@ -116,6 +128,16 @@ def test_create_seed_budget_chart_traces(sample_exp_a_df):
     trace_names = [trace.name for trace in fig.data]
     for algo in unique_algos:
         assert algo in trace_names
+
+
+def test_create_probability_sensitivity_chart(sample_exp_b_df):
+    """Verify probability sensitivity chart generates one trace per algorithm."""
+    fig = create_probability_sensitivity_chart(sample_exp_b_df)
+    assert fig is not None
+    assert isinstance(fig, go.Figure)
+    assert len(fig.data) == 3
+    assert "Probability" in fig.layout.xaxis.title.text
+
 
 
 # ---------------------------------------------------------------------------

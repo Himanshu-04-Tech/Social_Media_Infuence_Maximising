@@ -25,6 +25,7 @@ from .plotly_charts import (
     create_algorithm_comparison_chart,
     create_convergence_chart,
     create_degree_distribution_chart,
+    create_probability_sensitivity_chart,
     create_runtime_scalability_chart,
     create_seed_budget_chart,
 )
@@ -78,6 +79,20 @@ class VisualizationFactory:
         """Create interactive Plotly influence vs seed budget multi-line chart."""
         return create_seed_budget_chart(
             experiment_a_df=experiment_a_df,
+            config=config,
+            custom_logger=custom_logger or logger,
+        )
+
+    @classmethod
+    def create_probability_sensitivity_chart(
+        cls,
+        experiment_b_df: pd.DataFrame,
+        config: ChartConfig | None = None,
+        custom_logger: logging.Logger | None = None,
+    ) -> go.Figure:
+        """Create interactive Plotly influence vs probability multi-line chart."""
+        return create_probability_sensitivity_chart(
+            experiment_b_df=experiment_b_df,
             config=config,
             custom_logger=custom_logger or logger,
         )

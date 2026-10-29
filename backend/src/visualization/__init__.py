@@ -17,6 +17,7 @@ from .plotly_charts import (
     create_algorithm_comparison_chart,
     create_convergence_chart,
     create_degree_distribution_chart,
+    create_probability_sensitivity_chart,
     create_runtime_scalability_chart,
     create_seed_budget_chart,
 )
@@ -36,6 +37,7 @@ __all__ = [
     "ChartConfig",
     "create_algorithm_comparison_chart",
     "create_seed_budget_chart",
+    "create_probability_sensitivity_chart",
     "create_runtime_scalability_chart",
     "create_convergence_chart",
     "create_degree_distribution_chart",

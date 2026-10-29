@@ -1,16 +1,17 @@
 """Page 2: Batch Experimentation Suite.
 
 Executes Module 3 automated benchmark experiments:
-- Experiment A: Seed Budget (k = 1, 5, 10, 20)
-- Experiment B: Probability Sensitivity (p = 0.01, 0.05, 0.10, 0.20)
-- Experiment C: Runtime Scalability vs Network Size
-- Experiment D: Monte Carlo Convergence
+- Experiment A: Seed Budget (k = 5, 10, 20, 50)
+- Experiment B: Probability Sensitivity (p = 0.05, 0.10, 0.20, 0.30)
+- Experiment C: Runtime Scalability vs Network Size (|V| = 500, 1000, 2000, 4000)
+- Experiment D: Monte Carlo Convergence (N = 10, 50, 100, 500)
 - Run All Benchmark Suite
 """
 
 from __future__ import annotations
 
 import logging
+import pandas as pd
 import streamlit as st
 
 from experiments.experiment_runner import (
@@ -20,6 +21,7 @@ from experiments.experiment_runner import (
     run_scalability_experiment,
     run_seed_budget_experiment,
 )
+from storage.storage_manager import StorageManager
 from visualization.chart_builder import VisualizationFactory
 from ..state_manager import DashboardStateManager
 from ..utilities import load_dataset, select_seeds, simulate_single_cascade
@@ -35,11 +37,14 @@ def render_experiments_page(params: dict[str, any]) -> None:
     dataset_name = params.get("dataset", "SNAP Facebook (4,039 nodes)")
     graph = load_dataset(dataset_name)
 
-    # Wrap mock/real simulation functions for experiment framework
-    def get_seeds_fn(g, algo, k):
-        return select_seeds(g, algo, k)
+    # Standard benchmark algorithm mapping
+    algorithms = {
+        "Random": lambda g, k: select_seeds(g, "Random", k),
+        "Degree": lambda g, k: select_seeds(g, "Degree", k),
+        "Greedy": lambda g, k: select_seeds(g, "Greedy", k, candidate_mode="fast"),
+    }
 
-    def sim_fn(g, s, p):
+    def sim_fn(g: any, s: any, p: float) -> int:
         count, _ = simulate_single_cascade(g, list(s), p)
         return count
 
@@ -49,65 +54,112 @@ def render_experiments_page(params: dict[str, any]) -> None:
 
     exp_to_run = None
     with c1:
-        if st.button("🎯 Exp A: Seed Budget", use_container_width=True):
+        if st.button("🎯 Exp A: Seed Budget", use_container_width=True) is True:
             exp_to_run = "A"
     with c2:
-        if st.button("🎲 Exp B: Probability", use_container_width=True):
+        if st.button("🎲 Exp B: Probability", use_container_width=True) is True:
             exp_to_run = "B"
     with c3:
-        if st.button("📈 Exp C: Scalability", use_container_width=True):
+        if st.button("📈 Exp C: Scalability", use_container_width=True) is True:
             exp_to_run = "C"
     with c4:
-        if st.button("🔄 Exp D: Convergence", use_container_width=True):
+        if st.button("🔄 Exp D: Convergence", use_container_width=True) is True:
             exp_to_run = "D"
     with c5:
-        if st.button("🚀 Run All Experiments", type="primary", use_container_width=True):
+        if st.button("🚀 Run All Experiments", type="primary", use_container_width=True) is True:
             exp_to_run = "ALL"
 
     stored_exps = DashboardStateManager.get("experiment_results", {})
+    storage = StorageManager()
 
     if exp_to_run:
         progress_bar = st.progress(0.0, text=f"Executing Experiment {exp_to_run}...")
 
         try:
             if exp_to_run == "A":
-                progress_bar.progress(0.5, "Running Experiment A across k in [1, 5, 10, 20]...")
-                res_a = run_seed_budget_experiment(graph, get_seeds_fn=get_seeds_fn, simulate_fn=sim_fn)
-                stored_exps["ExpA"] = res_a.results_dataframe
-                st.success("✅ Experiment A completed!")
+                progress_bar.progress(0.3, "Running Experiment A across k in [5, 10, 20, 50]...")
+                df_a = run_seed_budget_experiment(
+                    graph=graph,
+                    algorithms=algorithms,
+                    simulate_fn=sim_fn,
+                    k_values=[5, 10, 20, 50],
+                    probability=0.10,
+                    num_simulations=min(params.get("num_simulations", 50), 30),
+                )
+                stored_exps["ExpA"] = df_a
+                storage.save_experiment_dataframe(df_a, "expA")
+                st.success("✅ Experiment A completed and saved to results/experiments/!")
 
             elif exp_to_run == "B":
-                progress_bar.progress(0.5, "Running Experiment B across p in [0.01, 0.05, 0.10, 0.20]...")
-                res_b = run_probability_experiment(graph, get_seeds_fn=get_seeds_fn, simulate_fn=sim_fn)
-                stored_exps["ExpB"] = res_b.results_dataframe
-                st.success("✅ Experiment B completed!")
+                progress_bar.progress(0.3, "Running Experiment B across p in [0.05, 0.10, 0.20, 0.30]...")
+                df_b = run_probability_experiment(
+                    graph=graph,
+                    algorithms=algorithms,
+                    simulate_fn=sim_fn,
+                    p_values=[0.05, 0.10, 0.20, 0.30],
+                    k=params.get("k", 10),
+                    num_simulations=min(params.get("num_simulations", 50), 30),
+                )
+                stored_exps["ExpB"] = df_b
+                storage.save_experiment_dataframe(df_b, "expB")
+                st.success("✅ Experiment B completed and saved to results/experiments/!")
 
             elif exp_to_run == "C":
-                progress_bar.progress(0.5, "Running Experiment C across network node counts...")
-                res_c = run_scalability_experiment(graph, get_seeds_fn=get_seeds_fn, simulate_fn=sim_fn)
-                stored_exps["ExpC"] = res_c.results_dataframe
-                st.success("✅ Experiment C completed!")
+                progress_bar.progress(0.3, "Running Experiment C across network node counts [500, 1000, 2000, 4000]...")
+                df_c = run_scalability_experiment(
+                    algorithms=algorithms,
+                    simulate_fn=sim_fn,
+                    sizes=[500, 1000, 2000, 4000],
+                    k=params.get("k", 10),
+                    probability=params.get("probability", 0.10),
+                    num_simulations=min(params.get("num_simulations", 50), 20),
+                )
+                stored_exps["ExpC"] = df_c
+                storage.save_experiment_dataframe(df_c, "expC")
+                st.success("✅ Experiment C completed and saved to results/experiments/!")
 
             elif exp_to_run == "D":
-                progress_bar.progress(0.5, "Running Experiment D across simulation counts...")
-                res_d = run_convergence_experiment(graph, get_seeds_fn=get_seeds_fn, simulate_fn=sim_fn)
-                stored_exps["ExpD"] = res_d.results_dataframe
-                st.success("✅ Experiment D completed!")
+                progress_bar.progress(0.3, "Running Experiment D across simulation counts [10, 50, 100, 500]...")
+                df_d = run_convergence_experiment(
+                    graph=graph,
+                    algorithms=algorithms,
+                    simulate_fn=sim_fn,
+                    simulation_counts=[10, 50, 100, 500],
+                    probability=params.get("probability", 0.10),
+                    k=params.get("k", 10),
+                )
+                stored_exps["ExpD"] = df_d
+                storage.save_experiment_dataframe(df_d, "expD")
+                st.success("✅ Experiment D completed and saved to results/experiments/!")
 
             elif exp_to_run == "ALL":
                 progress_bar.progress(0.2, "Executing benchmark suite...")
-                suite = run_all_experiments(graph, get_seeds_fn=get_seeds_fn, simulate_fn=sim_fn)
-                stored_exps["ExpA"] = suite["expA"].results_dataframe
-                stored_exps["ExpB"] = suite["expB"].results_dataframe
-                stored_exps["ExpC"] = suite["expC"].results_dataframe
-                stored_exps["ExpD"] = suite["expD"].results_dataframe
-                st.success("✅ All experiments completed successfully!")
+                suite = run_all_experiments(
+                    graph=graph,
+                    algorithms=algorithms,
+                    simulate_influence=sim_fn,
+                    num_simulations=min(params.get("num_simulations", 50), 20),
+                )
+                if "experiment_a" in suite:
+                    stored_exps["ExpA"] = suite["experiment_a"]
+                    storage.save_experiment_dataframe(suite["experiment_a"], "expA")
+                if "experiment_b" in suite:
+                    stored_exps["ExpB"] = suite["experiment_b"]
+                    storage.save_experiment_dataframe(suite["experiment_b"], "expB")
+                if "experiment_c" in suite:
+                    stored_exps["ExpC"] = suite["experiment_c"]
+                    storage.save_experiment_dataframe(suite["experiment_c"], "expC")
+                if "experiment_d" in suite:
+                    stored_exps["ExpD"] = suite["experiment_d"]
+                    storage.save_experiment_dataframe(suite["experiment_d"], "expD")
+                st.success("✅ All benchmark experiments completed and saved successfully!")
 
             DashboardStateManager.set("experiment_results", stored_exps)
             progress_bar.empty()
 
         except Exception as err:
             progress_bar.empty()
+            logger.error("Experiment execution failure: %s", err, exc_info=True)
             st.error(f"❌ Experiment execution error: {err}")
 
     # Display Active Experiment Results
@@ -128,6 +180,9 @@ def render_experiments_page(params: dict[str, any]) -> None:
             try:
                 if exp_key == "ExpA":
                     fig = VisualizationFactory.create_seed_budget_chart(df)
+                    st.plotly_chart(fig, use_container_width=True)
+                elif exp_key == "ExpB":
+                    fig = VisualizationFactory.create_probability_sensitivity_chart(df)
                     st.plotly_chart(fig, use_container_width=True)
                 elif exp_key == "ExpC":
                     fig = VisualizationFactory.create_runtime_scalability_chart(df, log_scale=True)

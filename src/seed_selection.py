@@ -2,16 +2,14 @@
 src/seed_selection.py
 
 Seed selection algorithms for Influence Maximization under the Independent Cascade model.
-Designed and analyzed for DAA (Design and Analysis of Algorithms).
+
 
 Algorithms implemented:
     1. Random Seed Selection (Baseline)
     2. Highest-Degree Seed Selection (Fast Heuristic)
     3. Greedy Influence Maximization (Core DAA Approximation Algorithm)
 
-Authors:
-    Zaid Hussain - Graph & Algorithm Engineer
-    Himanshu     - Frontend, Visualization & Integration Engineer
+
 """
 
 import random

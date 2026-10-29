@@ -496,3 +496,95 @@ def create_degree_distribution_chart(
 
     log.info("Chart Creation Finished | Chart Type=%s", chart_name)
     return fig
+
+
+# ---------------------------------------------------------------------------
+# CHART 6: Influence vs Propagation Probability (Exp B)
+# ---------------------------------------------------------------------------
+def create_probability_sensitivity_chart(
+    experiment_b_df: pd.DataFrame,
+    config: ChartConfig | None = None,
+    custom_logger: logging.Logger | None = None,
+) -> go.Figure:
+    """Create a multi-line chart displaying influence spread vs propagation probability (p).
+
+    Required columns:
+        - 'algorithm_name'
+        - 'probability'
+        - 'mean_influence'
+
+    Args:
+        experiment_b_df: Experiment B output DataFrame.
+        config: Optional ChartConfig overrides.
+        custom_logger: Optional logger instance.
+
+    Returns:
+        Interactive plotly.graph_objects.Figure.
+    """
+    log = custom_logger or logger
+    chart_name = "Influence vs Propagation Probability"
+
+    if experiment_b_df is not None and isinstance(experiment_b_df, pd.DataFrame):
+        experiment_b_df = experiment_b_df.copy()
+        if "algorithm_name" not in experiment_b_df.columns and "probability" in experiment_b_df.columns:
+            algo_cols = [c for c in experiment_b_df.columns if c != "probability"]
+            if algo_cols:
+                experiment_b_df = experiment_b_df.melt(
+                    id_vars=["probability"],
+                    value_vars=algo_cols,
+                    var_name="algorithm_name",
+                    value_name="mean_influence",
+                )
+
+    log.info(
+        "Chart Creation Started | Chart Type=%s | Rows Processed=%d",
+        chart_name,
+        len(experiment_b_df) if experiment_b_df is not None and hasattr(experiment_b_df, "__len__") else 0,
+        extra={"event": "Chart Creation Started", "chart_type": chart_name},
+    )
+
+    validate_chart_dataframe(
+        experiment_b_df,
+        required_columns=["algorithm_name", "probability", "mean_influence"],
+        chart_name=chart_name,
+    )
+    validate_chart_config(config)
+
+    cfg = config or ChartConfig(
+        title="Propagation Probability Sensitivity (p)",
+        x_label="Propagation Probability (p)",
+        y_label="Expected Influence Spread (Nodes)",
+    )
+
+    fig = go.Figure()
+    algorithms = experiment_b_df["algorithm_name"].unique()
+
+    for algo in algorithms:
+        sub = experiment_b_df[experiment_b_df["algorithm_name"] == algo].sort_values("probability")
+        fig.add_trace(
+            go.Scatter(
+                x=sub["probability"],
+                y=sub["mean_influence"],
+                mode="lines+markers",
+                name=str(algo),
+                hovertemplate=f"<b>{algo}</b><br>p: %{{x:.2f}}<br>Spread: %{{y:,.1f}}<extra></extra>",
+                line=dict(width=2.5),
+                marker=dict(size=8),
+            )
+        )
+
+    fig.update_layout(
+        title=dict(text=f"<b>{cfg.title}</b>", font=dict(size=18)),
+        xaxis=dict(title=cfg.x_label),
+        yaxis=dict(title=cfg.y_label),
+        template=cfg.template,
+        width=cfg.width,
+        height=cfg.height,
+        hovermode="x unified",
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+        margin=dict(l=60, r=60, t=80, b=60),
+    )
+
+    log.info("Chart Creation Finished | Chart Type=%s", chart_name)
+    return fig
+

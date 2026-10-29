@@ -404,6 +404,7 @@ def run_scalability_experiment(
             row_data = {
                 "experiment_id": exp_id,
                 "algorithm_name": algo_name,
+                "node_count": actual_node_count,
                 "k": k,
                 "probability": probability,
                 "num_simulations": num_simulations,
@@ -422,7 +423,8 @@ def run_scalability_experiment(
         extra={"event": "Experiment Completed", "runtime": total_time},
     )
 
-    return pd.DataFrame(rows, columns=EXPERIMENT_DF_COLUMNS)
+    scalability_columns = ["node_count"] + [c for c in EXPERIMENT_DF_COLUMNS if c != "node_count"]
+    return pd.DataFrame(rows, columns=scalability_columns)
 
 
 # ---------------------------------------------------------------------------

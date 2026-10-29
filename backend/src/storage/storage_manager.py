@@ -48,16 +48,24 @@ class StorageManager:
     # -----------------------------------------------------------------------
     # Helper path resolvers
     # -----------------------------------------------------------------------
-    def _resolve_file_path(self, category: str, filename_or_path: Path | str) -> Path:
+    def _resolve_file_path(self, category: str, filename_or_path: Path | str | StorageRecord) -> Path:
         """Resolve a filename or path to an absolute path within a category directory."""
+        if isinstance(filename_or_path, StorageRecord):
+            return Path(filename_or_path.file_path)
         p = Path(filename_or_path)
         if p.is_absolute():
             return p
         return self.file_manager.get_subdirectory(category) / p.name
 
-    def _normalize_experiment_filename(self, experiment_name: str) -> str:
+    def _normalize_experiment_filename(self, experiment_name: str | Path | StorageRecord) -> str:
         """Normalize experiment identifier to canonical expX_results.csv."""
-        clean = experiment_name.strip()
+        if isinstance(experiment_name, StorageRecord):
+            clean = experiment_name.file_name.strip()
+        elif isinstance(experiment_name, Path):
+            clean = experiment_name.name.strip()
+        else:
+            clean = str(experiment_name).strip()
+
         if clean.endswith(".csv"):
             return clean
         if clean.endswith("_results"):
@@ -87,6 +95,9 @@ class StorageManager:
         Raises:
             StorageValidationError: If DataFrame is empty or invalid.
         """
+        if isinstance(df, (str, Path)) and isinstance(experiment_name, pd.DataFrame):
+            df, experiment_name = experiment_name, str(df)
+
         validate_filename(experiment_name)
         validate_dataframe(df, check_experiment_integrity=True)
 
@@ -560,6 +571,15 @@ class StorageManager:
     def delete_file(self, path: Path | str) -> bool:
         """Delete a file using the FileManager."""
         return self.file_manager.delete_file(path)
+
+    def delete_saved_result(self, target: Path | str | StorageRecord, category: str | None = None) -> bool:
+        """Delete a saved result artifact by StorageRecord, Path, or filename with optional category."""
+        if isinstance(target, StorageRecord):
+            return self.delete_file(target.file_path)
+        if category and not Path(str(target)).is_absolute():
+            resolved = self._resolve_file_path(category, target)
+            return self.delete_file(resolved)
+        return self.delete_file(target)
 
     def file_exists(self, path: Path | str) -> bool:
         """Check if a file exists using the FileManager."""
